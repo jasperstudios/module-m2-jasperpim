@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+
+    <route url="/V1/configurations" method="GET">
+        <service class="Bluebadger\JasperPim\Api\ConfigurationsInterface" method="get"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!--A single endpoint for all batches (upsert) -->
+    <route url="/V1/jasper/batch" method="POST">
+        <service class="Bluebadger\JasperPim\Api\BatchInterface" method="post"/>
+        <resources>
+            <resource ref="Magento_Catalog::attributes_attributes"/>
+        </resources>
+    </route>
+
+
+    <!--Attribute endpoint-->
+    <route url="/V1/jasper/attribute" method="POST">
+        <service class="Bluebadger\JasperPim\Api\AttributeInterface" method="post"/>
+        <resources>
+            <resource ref="Magento_Catalog::attributes_attributes"/>
+        </resources>
+    </route>
+    <route url="/V1/jasper/attribute/:magento_id" method="PUT">
+        <service class="Bluebadger\JasperPim\Api\AttributeInterface" method="put"/>
+        <resources>
+            <resource ref="Magento_Catalog::attributes_attributes"/>
+        </resources>
+    </route>
+    <route url="/V1/jasper/attribute/:magento_id" method="DELETE">
+        <service class="Bluebadger\JasperPim\Api\AttributeInterface" method="delete"/>
+        <resources>
+            <resource ref="Magento_Catalog::attributes_attributes"/>
+        </resources>
+    </route>
+
+    <!--Attribute Set endpoint-->
+    <route url="/V1/jasper/attribute_set" method="POST">
+        <service class="Bluebadger\JasperPim\Api\AttributeSetInterface" method="post"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/jasper/attribute_set/:magento_id" method="PUT">
+        <service class="Bluebadger\JasperPim\Api\AttributeSetInterface" method="put"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/jasper/attribute_set/:magento_id" method="DELETE">
+        <service class="Bluebadger\JasperPim\Api\AttributeSetInterface" method="delete"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!--Attribute Option endpoint-->
+    <route url="/V1/jasper/attribute_option" method="POST">
+        <service class="Bluebadger\JasperPim\Api\AttributeOptionInterface" method="post"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/jasper/attribute_option/:magento_id" method="PUT">
+        <service class="Bluebadger\JasperPim\Api\AttributeOptionInterface" method="put"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/jasper/attribute_option/:magento_id" method="DELETE">
+        <service class="Bluebadger\JasperPim\Api\AttributeOptionInterface" method="delete"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!--Category endpoint-->
+    <route url="/V1/jasper/category" method="POST">
+        <service class="Bluebadger\JasperPim\Api\CategoryInterface" method="post"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/jasper/category/:magento_id" method="PUT">
+        <service class="Bluebadger\JasperPim\Api\CategoryInterface" method="put"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/jasper/category/:magento_id" method="DELETE">
+        <service class="Bluebadger\JasperPim\Api\CategoryInterface" method="delete"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <!--Product endpoints-->
+    <route url="/V1/jasper/product" method="POST">
+        <service class="Bluebadger\JasperPim\Api\ProductInterface" method="post"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+    <route url="/V1/jasper/product/:magento_id" method="PUT">
+        <service class="Bluebadger\JasperPim\Api\ProductInterface" method="put"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+    <route url="/V1/jasper/product/:magento_id" method="DELETE">
+        <service class="Bluebadger\JasperPim\Api\ProductInterface" method="delete"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+</routes>

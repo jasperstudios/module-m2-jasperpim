@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Bluebadger_JasperPim::jasperpim" title="JasperPIM API" module="Bluebadger_JasperPim" sortOrder="200" parent="Magento_Backend::system" resource="Bluebadger_JasperPim::jasperpim"/>
+        <add id="Bluebadger_JasperPim::config" title="Configuration" module="Bluebadger_JasperPim" sortOrder="10" parent="Bluebadger_JasperPim::jasperpim" resource="Bluebadger_JasperPim::config" action="admin/system_config/edit/section/jasperpim" />
+        <add id="Bluebadger_JasperPim::log" title="Log" module="Bluebadger_JasperPim" sortOrder="20" parent="Bluebadger_JasperPim::jasperpim" resource="Bluebadger_JasperPim::log" action="jasperpim/log" />
+    </menu>
+</config>

@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <title>JasperPim Log</title>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="Magento\Backend\Block\Widget\Grid" name="adminhtml.jasperpim.log.container.container.grid" as="grid">
+                <arguments>
+                    <argument name="id" xsi:type="string">logGrid</argument>
+                    <argument name="dataSource" xsi:type="object">Bluebadger\JasperPim\Model\ResourceModel\Log\Collection</argument>
+                    <argument name="default_sort" xsi:type="string">log_id</argument>
+                    <argument name="default_dir" xsi:type="string">DESC</argument>
+                </arguments>
+
+                <block class="Magento\Backend\Block\Widget\Grid\ColumnSet" name="adminhtml.jasperpim.log.container.container.grid.columnSet" as="grid.columnSet">
+                    <block class="Magento\Backend\Block\Widget\Grid\Column" as="log_id">
+                        <arguments>
+                            <argument name="header" xsi:type="string" translate="true">Log ID</argument>
+                            <argument name="index" xsi:type="string">log_id</argument>
+                        </arguments>
+                    </block>
+                    <block class="Magento\Backend\Block\Widget\Grid\Column" as="instance_id">
+                        <arguments>
+                            <argument name="header" xsi:type="string" translate="true">Instance ID</argument>
+                            <argument name="index" xsi:type="string">instance_id</argument>
+                        </arguments>
+                    </block>
+                    <block class="Magento\Backend\Block\Widget\Grid\Column" as="level">
+                        <arguments>
+                            <argument name="header" xsi:type="string" translate="true">Level</argument>
+                            <argument name="index" xsi:type="string">level</argument>
+                        </arguments>
+                    </block>
+                    <block class="Magento\Backend\Block\Widget\Grid\Column" as="message">
+                        <arguments>
+                            <argument name="header" xsi:type="string" translate="true">Message</argument>
+                            <argument name="index" xsi:type="string">message</argument>
+                        </arguments>
+                    </block>
+                    <block class="Magento\Backend\Block\Widget\Grid\Column" as="time">
+                        <arguments>
+                            <argument name="header" xsi:type="string" translate="true">Date</argument>
+                            <argument name="index" xsi:type="string">time</argument>
+                            <argument name="type" xsi:type="string">datetime</argument>
+                        </arguments>
+                    </block>
+                </block>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Bluebadger\JasperPim\Api\Data\AttributeInterface" type="Bluebadger\JasperPim\Model\Data\AttributeEntity" />
+    <preference for="Bluebadger\JasperPim\Api\Data\AttributeOptionInterface" type="Bluebadger\JasperPim\Model\Data\AttributeOptionEntity" />
+    <preference for="Bluebadger\JasperPim\Api\Data\AttributeSetInterface" type="Bluebadger\JasperPim\Model\Data\AttributeSetEntity" />
+    <preference for="Bluebadger\JasperPim\Api\Data\CategoryInterface" type="Bluebadger\JasperPim\Model\Data\CategoryEntity" />
+    <preference for="Bluebadger\JasperPim\Api\Data\ProductInterface" type="Bluebadger\JasperPim\Model\Data\ProductEntity" />
+
+    <preference for="Bluebadger\JasperPim\Api\Data\AttributeFrontendInterface" type="Bluebadger\JasperPim\Model\Data\AttributeFrontend" />
+    <preference for="Bluebadger\JasperPim\Api\Data\AttributeGroupInterface" type="Bluebadger\JasperPim\Model\Data\AttributeGroup" />
+
+    <preference for="Bluebadger\JasperPim\Api\Data\ScopedValueInterface" type="Bluebadger\JasperPim\Model\Data\ScopedValue" />
+
+    <preference for="Bluebadger\JasperPim\Api\Data\AttributeValueInterface" type="Bluebadger\JasperPim\Model\Data\AttributeValue" />
+    <preference for="Bluebadger\JasperPim\Api\Data\ProductImageInterface" type="Bluebadger\JasperPim\Model\Data\ProductImage" />
+    <preference for="Bluebadger\JasperPim\Api\Data\ProductInventoryInterface" type="Bluebadger\JasperPim\Model\Data\ProductInventory" />
+    <preference for="Bluebadger\JasperPim\Api\Data\ProductPricingInterface" type="Bluebadger\JasperPim\Model\Data\ProductPricing" />
+
+    <preference for="Bluebadger\JasperPim\Api\BatchInterface" type="Bluebadger\JasperPim\Model\BatchRepository" />
+    <preference for="Bluebadger\JasperPim\Api\AttributeInterface" type="Bluebadger\JasperPim\Model\AttributeRepository" />
+    <preference for="Bluebadger\JasperPim\Api\AttributeOptionInterface" type="Bluebadger\JasperPim\Model\AttributeOptionRepository" />
+    <preference for="Bluebadger\JasperPim\Api\AttributeSetInterface" type="Bluebadger\JasperPim\Model\AttributeSetRepository" />
+    <preference for="Bluebadger\JasperPim\Api\CategoryInterface" type="Bluebadger\JasperPim\Model\CategoryRepository" />
+    <preference for="Bluebadger\JasperPim\Api\ProductInterface" type="Bluebadger\JasperPim\Model\ProductRepository" />
+
+    <preference for="Bluebadger\JasperPim\Api\ConfigurationsInterface" type="Bluebadger\JasperPim\Model\Configurations" />
+    <preference for="Bluebadger\JasperPim\Api\Data\ConfigurationsResponseInterface" type="Bluebadger\JasperPim\Model\Data\ConfigurationsResponse" />
+    <preference for="Bluebadger\JasperPim\Api\Data\ConfigurationsResponseRootNodeInterface" type="Bluebadger\JasperPim\Model\Data\ConfigurationsResponseRootNode" />
+    <preference for="Bluebadger\JasperPim\Api\Data\ConfigurationsWebsitesResponseInterface" type="Bluebadger\JasperPim\Model\Data\ConfigurationsWebsitesResponse" />
+    <preference for="Bluebadger\JasperPim\Api\Data\Configurations\LimitsInterface" type="Bluebadger\JasperPim\Model\Data\Configurations\Limits" />
+    <preference for="Bluebadger\JasperPim\Api\Data\ConfigurationsWebsiteResponseInterface" type="Bluebadger\JasperPim\Model\Data\ConfigurationsWebsiteResponse" />
+
+    <preference for="Bluebadger\JasperPim\Api\Data\SaveResponseInterface" type="Bluebadger\JasperPim\Model\Data\SaveResponse" />
+    <preference for="Bluebadger\JasperPim\Api\Data\ResponseEntityInterface" type="Bluebadger\JasperPim\Model\Data\ResponseEntity" />
+
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="jasperpim_log_listing_data_source" xsi:type="string">Bluebadger\JasperPim\Model\ResourceModel\Log\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Bluebadger\JasperPim\Model\ResourceModel\Log\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">jasperpim_log</argument>
+            <argument name="resourceModel" xsi:type="string">Bluebadger\JasperPim\Model\ResourceModel\Log\</argument>
+        </arguments>
+    </virtualType>
+</config>

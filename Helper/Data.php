@@ -181,6 +181,34 @@ class Data
     }
 
     /**
+     * @param int $productId
+     * @return bool
+     */
+    public function simpleProductExists($productId) {
+        $tableName = $this->getTableName('catalog_product_entity');
+        $idField = $this->tableHasRowId($tableName) ? 'row_id' : 'entity_id';
+        $connection = $this->getConnection();
+        $select = $connection->select()
+            ->from($tableName)
+            ->where($idField . ' = ?', $productId)
+            ->where('type_id = ?', 'simple');
+
+        return !! $connection->fetchOne($select);
+    }
+
+    public function attributeOptionExists($attributeCode, $optionId) {
+        $tableName = $this->getTableName('eav_attribute_option');
+        $attributeId = $this->getAttributeIdFromAttributeCode($attributeCode);
+        $connection = $this->getConnection();
+        $select = $connection->select()
+            ->from($tableName)
+            ->where('option_id = ?', $optionId)
+            ->where('attribute_id = ?', $attributeId);
+
+        return !! $connection->fetchOne($select);
+    }
+
+    /**
      * @param string[] $attributeCodes
      * @param string $entityTypeCode
      * @return int[]

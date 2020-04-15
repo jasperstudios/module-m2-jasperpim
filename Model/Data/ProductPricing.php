@@ -13,6 +13,9 @@ class ProductPricing implements \Bluebadger\JasperPim\Api\Data\ProductPricingInt
     private $specialToDate = '';
     private $groupPrices = [];
 
+    private $costWasProvided = false;
+    private $msrpWasProvided = false;
+
     public function getPrice()
     {
         return $this->price;
@@ -42,6 +45,7 @@ class ProductPricing implements \Bluebadger\JasperPim\Api\Data\ProductPricingInt
 
     public function setCost($cost)
     {
+        $this->costWasProvided = true;
         $this->cost = $cost;
         return $this;
     }
@@ -53,6 +57,7 @@ class ProductPricing implements \Bluebadger\JasperPim\Api\Data\ProductPricingInt
 
     public function setMsrp($msrp)
     {
+        $this->msrpWasProvided = true;
         $this->msrp = $msrp;
         return $this;
     }
@@ -88,5 +93,12 @@ class ProductPricing implements \Bluebadger\JasperPim\Api\Data\ProductPricingInt
     {
         $this->groupPrices = $group_prices;
         return $this;
+    }
+
+    public function getCostWasProvided() {
+        return $this->costWasProvided;
+    }
+    public function getMsrpWasProvided() {
+        return $this->msrpWasProvided;
     }
 }

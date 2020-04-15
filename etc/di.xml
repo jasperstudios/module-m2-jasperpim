@@ -15,6 +15,7 @@
     <preference for="Bluebadger\JasperPim\Api\Data\ProductImageInterface" type="Bluebadger\JasperPim\Model\Data\ProductImage" />
     <preference for="Bluebadger\JasperPim\Api\Data\ProductInventoryInterface" type="Bluebadger\JasperPim\Model\Data\ProductInventory" />
     <preference for="Bluebadger\JasperPim\Api\Data\ProductPricingInterface" type="Bluebadger\JasperPim\Model\Data\ProductPricing" />
+    <preference for="Bluebadger\JasperPim\Api\Data\ProductConfigurationsInterface" type="Bluebadger\JasperPim\Model\Data\ProductConfigurations" />
 
     <preference for="Bluebadger\JasperPim\Api\BatchInterface" type="Bluebadger\JasperPim\Model\BatchRepository" />
     <preference for="Bluebadger\JasperPim\Api\AttributeInterface" type="Bluebadger\JasperPim\Model\AttributeRepository" />

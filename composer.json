@@ -1,13 +1,13 @@
 {
-  "name": "jasperpim/module-m2-jasperpim",
-  "description": "Jasper PIM M2 Connector",
+  "name": "bluebadger/module-jasperpim",
+  "description": "N/A",
   "require": {
     "magento/framework": "102.*"
   },
   "type": "magento2-module",
   "version": "1.0.0",
   "license": [
-    "OSL-3.0"
+    ""
   ],
   "autoload": {
     "files": [

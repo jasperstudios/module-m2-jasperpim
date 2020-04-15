@@ -9,6 +9,8 @@ use Zend_Db_Expr as Expr;
 
 class ProductEntity extends Entity implements \Bluebadger\JasperPim\Api\Data\ProductInterface
 {
+    const TYPE_SIMPLE = 'simple';
+    const TYPE_CONFIGURABLE = 'configurable';
 
     private $type = 'simple';
     private $sku = '';
@@ -19,6 +21,7 @@ class ProductEntity extends Entity implements \Bluebadger\JasperPim\Api\Data\Pro
     private $pricing;
     private $inventory;
     private $categories = [];
+    private $configurations;
 
     /**
      * @var \Magento\Catalog\Model\Product\Factory
@@ -40,25 +43,34 @@ class ProductEntity extends Entity implements \Bluebadger\JasperPim\Api\Data\Pro
      * @var \Bluebadger\JasperPim\Helper\Config
      */
     private $configHelper;
+    /**
+     * @var \Magento\Framework\App\CacheInterface
+     */
+    private $cacheManager;
 
     public function __construct(
         \Bluebadger\JasperPim\Api\Data\ProductPricingInterfaceFactory $productPricingFactory,
         \Bluebadger\JasperPim\Api\Data\ProductInventoryInterfaceFactory $productInventoryFactory,
+        \Bluebadger\JasperPim\Api\Data\ProductConfigurationsInterfaceFactory $productConfigurationsFactory,
         \Magento\Catalog\Model\ProductFactory $productFactory,
         \Magento\Catalog\Model\ProductRepository $productRepository,
         \Magento\Catalog\Model\Product $magentoProduct,
         \Bluebadger\JasperPim\Helper\Data $helper,
         \Bluebadger\JasperPim\Helper\Config $configHelper,
         \Bluebadger\JasperPim\Model\Logger $logger,
-        ProductUrlPathGenerator $productUrlPathGenerator
+        ProductUrlPathGenerator $productUrlPathGenerator,
+        \Magento\Framework\App\CacheInterface $cacheManager
     ) {
         $this->pricing = $productPricingFactory->create();
         $this->inventory = $productInventoryFactory->create();
+        $this->configurations = $productConfigurationsFactory->create();
         $this->productFactory = $productFactory;
         $this->productRepository = $productRepository;
         $this->magentoProduct = $magentoProduct;
         $this->productUrlPathGenerator = $productUrlPathGenerator;
         $this->configHelper = $configHelper;
+        $this->cacheManager = $cacheManager;
+
         parent::__construct($helper, $logger);
     }
 
@@ -161,6 +173,17 @@ class ProductEntity extends Entity implements \Bluebadger\JasperPim\Api\Data\Pro
         return $this;
     }
 
+    public function getConfigurations()
+    {
+        return $this->configurations;
+    }
+
+    public function setConfigurations($configurations)
+    {
+        $this->configurations = $configurations;
+        return $this;
+    }
+
     protected function _validate()
     {
         if (!$this->getSku()) {
@@ -174,10 +197,30 @@ class ProductEntity extends Entity implements \Bluebadger\JasperPim\Api\Data\Pro
         if (!$this->helper->attributeSetExists($this->getAttributeSet())) {
             $attributeSet = $this->getAttributeSet();
             $this->addValidationException("Invalid attribute_set provided: '$attributeSet', please first create it");
+            return false;
+        }
+
+        // configurable-specific validation
+        if($this->getType() == self::TYPE_CONFIGURABLE) {
+            foreach($this->getConfigurations()->getSuperAttributes() as $indexAssociated => $superAttribute) {
+                if(!$this->helper->getAttributeIdFromAttributeCode($superAttribute)) {
+                    $this->addValidationException("Associated product error [$indexAssociated]: Attribute '$superAttribute' does not exist");
+                    return false;
+                }
+            }
+            foreach($this->getConfigurations()->getAssociatedProducts() as $indexAssociated => $associatedProduct) {
+                $productId = (int)$associatedProduct;
+                if(!$this->helper->simpleProductExists($productId)) {
+                    $this->addValidationException("Associated product error [$indexAssociated]: Simple product with ID '$productId' does not exist");
+                    return false;
+                }
+            }
         }
         if (!$this->helper->allCategoriesExist($this->getCategories())) {
             $this->addValidationException("Not all categories exist, please check 'categories'");
+            return false;
         }
+
         return true;
     }
 
@@ -212,6 +255,16 @@ class ProductEntity extends Entity implements \Bluebadger\JasperPim\Api\Data\Pro
         $this->logger->debug('ProductEntity::save will save categories');
         $this->saveCategories();
         $this->logger->debug('ProductEntity::save categories saved');
+
+        if($this->getType() == self::TYPE_CONFIGURABLE) {
+            $this->logger->debug('ProductEntity::save will save configurations');
+            $this->saveConfigurations();
+            $this->logger->debug('ProductEntity::save configurations saved');
+
+            $this->logger->debug('ProductEntity::save will clean cache for configurable product');
+            $this->cacheManager->clean(['configurable_' . $this->getMagentoId()]);
+            $this->logger->debug('ProductEntity::save cleaned cache for configurable product');
+        }
 
         $this->logger->debug('ProductEntity::save will save url rewrites');
         $this->saveUrlRewrites();
@@ -436,6 +489,135 @@ class ProductEntity extends Entity implements \Bluebadger\JasperPim\Api\Data\Pro
         }
     }
 
+    protected function saveConfigurations() {
+//        print_r($this->getAssociatedProducts());
+
+        /** @var AdapterInterface $connection */
+        $connection = $this->helper->getConnection();
+
+        $valuesLabels = [];
+        $valuesRelations = []; // catalog_product_relation
+        $valuesSuperLink = []; // catalog_product_super_link
+        $stores = $this->helper->getStores();
+
+        $entityId = $this->getMagentoId();
+
+        $tableNameSuperAttribute = $this->helper->getTableName('catalog_product_super_attribute');
+        $tableNameSuperAttrLabel = $this->helper->getTableName('catalog_product_super_attribute_label');
+        $tableNameRelation       = $this->helper->getTableName('catalog_product_relation');
+        $tableNameSuperLink      = $this->helper->getTableName('catalog_product_super_link');
+
+        $attributeIds = [];
+        $superAttrIds = [];
+        $childrenIds  = [];
+
+
+        /** @var int $position */
+        $position = 0;
+        /** @var int $id */
+        foreach ($this->getConfigurations()->getSuperAttributes() as $associationAttribute) {
+            $attributeId = $this->helper->getAttributeIdFromAttributeCode($associationAttribute);
+            $attributeIds[$attributeId] = true;
+
+            /** @var array $values */
+            $values = [
+                'product_id'   => $entityId,
+                'attribute_id' => $attributeId,
+                'position'     => $position++,
+            ];
+            $connection->insertOnDuplicate($tableNameSuperAttribute, $values, []);
+
+            /** @var string $superAttributeId */
+            $superAttributeId = $connection->fetchOne(
+                $connection->select()
+                    ->from($tableNameSuperAttribute)
+                    ->where('attribute_id = ?', $attributeId)
+                    ->where('product_id = ?', $entityId)
+            );
+
+            $superAttrIds[] = $superAttributeId;
+
+            foreach (array_keys($stores) as $storeId) {
+                $valuesLabels[] = [
+                    'product_super_attribute_id' => $superAttributeId,
+                    'store_id'                   => $storeId,
+                    'use_default'                => 0,
+                    'value'                      => '',
+                ];
+            }
+        }
+
+
+        /** @var array $row */
+        foreach($this->getConfigurations()->getAssociatedProducts() as $associatedProduct) {
+            /** @var int $childId */
+            $childId = (int)$associatedProduct;
+            $childrenIds[] = $childId;
+
+            $valuesRelations[] = [
+                'parent_id' => $entityId,
+                'child_id'  => $childId
+            ];
+
+            $valuesSuperLink[] = [
+                'product_id' => $childId,
+                'parent_id'  => $entityId
+            ];
+        }
+
+        if($valuesLabels) {
+            $connection->insertOnDuplicate(
+                $tableNameSuperAttrLabel,
+                $valuesLabels,
+                []
+            );
+        }
+
+        if($valuesRelations) {
+            $connection->insertOnDuplicate(
+                $tableNameRelation,
+                $valuesRelations,
+                []
+            );
+        }
+
+        if($valuesSuperLink) {
+            $connection->insertOnDuplicate(
+                $tableNameSuperLink,
+                $valuesSuperLink,
+                []
+            );
+        }
+
+        // Clean up
+        $delete = $connection->deleteFromSelect(
+            $connection->select()
+                ->from($tableNameSuperAttribute)
+                ->where('attribute_id NOT IN (?)', array_keys($attributeIds))
+                ->where('product_id = ?', $entityId),
+            $tableNameSuperAttribute
+        );
+        $connection->query($delete);
+
+        $delete = $connection->deleteFromSelect(
+            $connection->select()
+                ->from($tableNameRelation)
+                ->where('parent_id = ?', $entityId)
+                ->where('child_id NOT IN (?)', $childrenIds),
+            $tableNameRelation
+        );
+        $connection->query($delete);
+
+        $delete = $connection->deleteFromSelect(
+            $connection->select()
+                ->from($tableNameSuperLink)
+                ->where('parent_id = ?', $entityId)
+                ->where('product_id NOT IN (?)', $childrenIds),
+            $tableNameSuperLink
+        );
+        $connection->query($delete);
+    }
+
     protected function saveCategories()
     {
         if ($this->getCategories()) {
@@ -527,8 +709,8 @@ class ProductEntity extends Entity implements \Bluebadger\JasperPim\Api\Data\Pro
         $this->doSaveAttribute('special_price', $specialPrice);
         $this->doSaveAttribute('special_from_date', $specialFromDate);
         $this->doSaveAttribute('special_to_date', $specialToDate);
-        $this->doSaveAttribute('cost', $cost);
-        $this->doSaveAttribute('msrp', $msrp);
+        $this->doSaveAttribute('cost', $cost, 0, !$this->getPricing()->getCostWasProvided());
+        $this->doSaveAttribute('msrp', $msrp, 0, !$this->getPricing()->getMsrpWasProvided());
 
         // TODO: Do something with $pricing->getGroupPrices()
     }
@@ -666,11 +848,15 @@ class ProductEntity extends Entity implements \Bluebadger\JasperPim\Api\Data\Pro
         }
     }
 
-    protected function doSaveAttribute($attributeCode, $attributeValue, $storeId = 0)
+    protected function doSaveAttribute($attributeCode, $attributeValue, $storeId = 0, $silentValidation = false)
     {
         $attributeId = $this->helper->getAttributeIdFromAttributeCode($attributeCode);
         if (!$attributeId) {
-            throw new ValidationException('Invalid attribute_code: ' . $attributeCode);
+            if($silentValidation) {
+                return false;
+            } else {
+                throw new ValidationException('Invalid attribute_code: ' . $attributeCode);
+            }
         }
         return $this->saveAttributeValue($attributeId, $attributeValue, $storeId);
     }

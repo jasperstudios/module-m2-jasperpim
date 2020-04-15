@@ -89,4 +89,13 @@ interface ProductInterface extends EntityInterface
      * @return $this
      */
     public function setCategories($categories);
+    /**
+     * @return \Bluebadger\JasperPim\Api\Data\ProductConfigurationsInterface
+     */
+    public function getConfigurations();
+    /**
+     * @param \Bluebadger\JasperPim\Api\Data\ProductConfigurationsInterface $configurations
+     * @return $this
+     */
+    public function setConfigurations($configurations);
 }

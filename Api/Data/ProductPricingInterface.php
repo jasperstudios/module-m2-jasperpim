@@ -71,4 +71,13 @@ interface ProductPricingInterface
      * @return $this
      */
     public function setGroupPrices($group_prices);
+
+    /**
+     * @return bool
+     */
+    public function getCostWasProvided();
+    /**
+     * @return bool
+     */
+    public function getMsrpWasProvided();
 }
